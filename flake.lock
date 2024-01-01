@@ -1,0 +1,26 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1637848014,
+        "narHash": "sha256-AeeGWjRMyuinBM0uK2c4jvqDNObCsDOpe3D7Cex+Goc=",
+        "owner": "zwizwa",
+        "repo": "nixpkgs",
+        "rev": "1e0f0b95471f56e56b2b57541ac639ff6209cc4f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zwizwa",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
