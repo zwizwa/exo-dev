@@ -1,6 +1,75 @@
 {
   "nodes": {
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1701680307,
+        "narHash": "sha256-kAuep2h5ajznlPMD9rnQyffWG8EM/C73lejGofXvdM8=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "4022d587cbbfd70fe950c1e2083a02621806a725",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "libopencm3": {
+      "inputs": {
+        "libopencm3": "libopencm3_2",
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1704210526,
+        "narHash": "sha256-2GYFAfv64VT40MO7jinMLqbOwGXDfhrrIvQtfGpzlVI=",
+        "owner": "zwizwa",
+        "repo": "libopencm3-flake",
+        "rev": "000dbd4d7f2075c647af6b6af1f24f99eba8d967",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zwizwa",
+        "repo": "libopencm3-flake",
+        "type": "github"
+      }
+    },
+    "libopencm3_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1562427529,
+        "narHash": "sha256-kTwHABaDAXO57pFlPK33erJZUPUV6aUy4XHhFCxTUOw=",
+        "owner": "zwizwa",
+        "repo": "libopencm3",
+        "rev": "3eff201a4bb3759a9c967a6f5e3fd0aad46dc5af",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zwizwa",
+        "repo": "libopencm3",
+        "rev": "3eff201a4bb3759a9c967a6f5e3fd0aad46dc5af",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
+      "locked": {
+        "lastModified": 1637848014,
+        "narHash": "sha256-AeeGWjRMyuinBM0uK2c4jvqDNObCsDOpe3D7Cex+Goc=",
+        "owner": "zwizwa",
+        "repo": "nixpkgs",
+        "rev": "1e0f0b95471f56e56b2b57541ac639ff6209cc4f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zwizwa",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
       "locked": {
         "lastModified": 1637848014,
         "narHash": "sha256-AeeGWjRMyuinBM0uK2c4jvqDNObCsDOpe3D7Cex+Goc=",
@@ -17,7 +86,45 @@
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "libopencm3": "libopencm3",
+        "nixpkgs": "nixpkgs_2",
+        "rust-overlay": "rust-overlay"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1704075545,
+        "narHash": "sha256-L3zgOuVKhPjKsVLc3yTm2YJ6+BATyZBury7wnhyc8QU=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "a0df72e106322b67e9c6e591fe870380bd0da0d5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
       }
     }
   },

@@ -14,12 +14,15 @@ echo "pwd=$(pwd)"
 # are extracted.
 echo "src=$src"
 
+# Convert PATH, NIX_LDFLAGS and NIX_CFLAGS_COMPILE to EXO_DEV_
+# variables that can be used in a build script to reconstruct PATH,
+# LDFLAGS and CFLAGS.  Perform some formatting to make the env file
+# easier to read.  You do not need this file when you are using "nix
+# develop".
+#
 # Note that multi-line bash variables are not a good idea.  They work
 # if bash does the expansion, but GNU Make will not replace the
 # newlines with spaces.
-
-set | grep CFLAGS
-
 cat <<EOF >$out/env
 EXO_DEV_PATH=\\
 ${out}/bin:\\
@@ -33,9 +36,8 @@ EOF
 mkdir -p $out/lib64
 mkdir -p $out/lib
 
-# The 'exo-dev' binary is for tools that are installed via nixos, where the
-# version is always up to do.  It is only the raw source repos that have
-# raw references to /nix/store to not include a dependency on nix itself.
+# The 'exo-dev' prints the location of the repository.  Useful when
+# this package is installed.
 mkdir -p $out/bin
 cat <<EOF >$out/bin/exo-dev
 #!/bin/sh

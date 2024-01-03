@@ -16,14 +16,47 @@
 {
   description = "Build dependencies for exo projects";
   # inputs.nixpkgs.url = github:NixOS/nixpkgs/85f1ba3e51676fa8cc604a3d863d729026a6b8eb; # Unstable snapshot.
-  inputs.nixpkgs.url = github:zwizwa/nixpkgs;
+  inputs = {
+    nixpkgs.url = github:zwizwa/nixpkgs;
 
-  outputs = { self, nixpkgs }:
-    let pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    # This is split off so it doesn't need to be rebuilt when exo-dev
+    # dependencies change.
+    libopencm3.url = github:zwizwa/libopencm3-flake;
+
+    # Wrapper for binary distribution implemented as a nixpkgs overlay.
+    # https://github.com/oxalica/rust-overlay/blob/master/docs/reference.md
+    # https://github.com/oxalica/rust-overlay/blob/master/README.md
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      # url = "git+file:///i/tom/git/rust-overlay";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        # flake-utils.follows = "flake-utils";
+      };
+    };
+  };
+
+  outputs = { self, nixpkgs, libopencm3, rust-overlay }:
+    let system = "x86_64-linux";
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays =  [ (import rust-overlay) ];
+        };
+        targets = [ "thumbv7m-none-eabi" ];
+        rustToolchain = pkgs.pkgsBuildHost.rust-bin.stable.latest.default.override {
+          inherit targets;
+        };
+
+        #  toolchain = pkgs.rustChannels.stable;
+        # rustc = toolchain.rust.override { inherit targets; }
+        # rustPlatform = pkgs.recurseIntoAttrs (pkgs.makeRustPlatform {
+        #   rustc = rustc;
+        #   cargo = toolchain.cargo;
+        # });
     in
   {
-    packages.x86_64-linux.default =
-      with import nixpkgs { system = "x86_64-linux"; };
+    packages.${system}.default =
+      with import nixpkgs { inherit system; };
       stdenv.mkDerivation {
         name = "exo-dev";
         buildInputs = with pkgs; [
@@ -32,10 +65,12 @@
           openocd python socat readline sqlite boehmgc
           libusb libusb-compat-0_1
           jack2 a2jmidid alsa-lib puredata
+          rustToolchain
           # rustup
           # unstable.zig
         ];
         src = self;
+        LIBOPENCM3 = libopencm3.packages.${system}.default;
         builder = ./builder.sh;
       };
   };
