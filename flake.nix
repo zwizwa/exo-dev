@@ -15,9 +15,11 @@
 
 {
   description = "Build dependencies for exo projects";
-  # inputs.nixpkgs.url = github:NixOS/nixpkgs/85f1ba3e51676fa8cc604a3d863d729026a6b8eb; # Unstable snapshot.
   inputs = {
-    nixpkgs.url = github:zwizwa/nixpkgs;
+    # Old system snapshot. Try to remove this eventually.
+    nixpkgs_old.url = github:zwizwa/nixpkgs;
+    # New unstable snapshot.
+    nixpkgs.url = github:NixOS/nixpkgs/85f1ba3e51676fa8cc604a3d863d729026a6b8eb;
 
     # This is split off so it doesn't need to be rebuilt when exo-dev
     # dependencies change.
@@ -36,42 +38,69 @@
     };
   };
 
-  outputs = { self, nixpkgs, libopencm3, rust-overlay }:
+  outputs = { self, nixpkgs_old, nixpkgs, libopencm3, rust-overlay }:
     let system = "x86_64-linux";
+        pkgs_old = import nixpkgs_old {
+          inherit system;
+        };
         pkgs = import nixpkgs {
           inherit system;
           overlays =  [ (import rust-overlay) ];
         };
-        targets = [ "thumbv7m-none-eabi" ];
-        rustToolchain = pkgs.pkgsBuildHost.rust-bin.stable.latest.default.override {
+        targets = [
+          "thumbv6m-none-eabi"
+          "thumbv7m-none-eabi"
+          "thumbv7em-none-eabihf"
+        ];
+        rustToolchain = pkgs.pkgsBuildHost.rust-bin.stable."1.75.0".default.override {
+          extensions = [ "rust-src" "rust-analyzer" ];
           inherit targets;
         };
-
-        #  toolchain = pkgs.rustChannels.stable;
-        # rustc = toolchain.rust.override { inherit targets; }
-        # rustPlatform = pkgs.recurseIntoAttrs (pkgs.makeRustPlatform {
-        #   rustc = rustc;
-        #   cargo = toolchain.cargo;
-        # });
+        buildInputs = (with pkgs_old; [
+          # FIXME: Is this still needed?
+          python
+          # C
+          gcc-arm-embedded
+        ]) ++ (with pkgs; [
+          # base deps
+          which bash hexdump git socat readline sqlite boehmgc
+          # debugging
+          openocd
+          # C
+          gcc clang
+          # usb
+          libusb libusb-compat-0_1
+          # audio
+          jack2 a2jmidid alsa-lib puredata
+          # rust
+          rustToolchain # rustup explicitly not used
+          # fpga
+          yosys nextpnr
+          # zig
+          zig
+        ]);
     in
   {
+    # Old hack to collect buildInputs in env vars.
     packages.${system}.default =
-      with import nixpkgs { inherit system; };
-      stdenv.mkDerivation {
+      pkgs.stdenv.mkDerivation {
         name = "exo-dev";
-        buildInputs = with pkgs; [
-          gcc gcc-arm-embedded
-          which bash hexdump git
-          openocd python socat readline sqlite boehmgc
-          libusb libusb-compat-0_1
-          jack2 a2jmidid alsa-lib puredata
-          rustToolchain
-          # rustup
-          # unstable.zig
-        ];
         src = self;
         LIBOPENCM3 = libopencm3.packages.${system}.default;
+        inherit buildInputs rustToolchain;
+        cToolchain = pkgs.gcc;
         builder = ./builder.sh;
+      };
+
+    # New standard flake approach
+    devShells.${system}.default =
+      pkgs.mkShell {
+        packages = buildInputs;
+        TPF = "${pkgs.gcc-arm-embedded}/bin/arm-none-eabi-";
+        LIBOPENCM3 = libopencm3.packages.${system}.default;
+        shellHook = ''
+          PS1="(exo-dev) \u@\h:\w\$ "
+        '';          
       };
   };
 }

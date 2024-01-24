@@ -71,6 +71,22 @@
     },
     "nixpkgs_2": {
       "locked": {
+        "lastModified": 1699099776,
+        "narHash": "sha256-X09iKJ27mGsGambGfkKzqvw5esP1L/Rf8H3u3fCqIiU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "85f1ba3e51676fa8cc604a3d863d729026a6b8eb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "85f1ba3e51676fa8cc604a3d863d729026a6b8eb",
+        "type": "github"
+      }
+    },
+    "nixpkgs_old": {
+      "locked": {
         "lastModified": 1637848014,
         "narHash": "sha256-AeeGWjRMyuinBM0uK2c4jvqDNObCsDOpe3D7Cex+Goc=",
         "owner": "zwizwa",
@@ -88,6 +104,7 @@
       "inputs": {
         "libopencm3": "libopencm3",
         "nixpkgs": "nixpkgs_2",
+        "nixpkgs_old": "nixpkgs_old",
         "rust-overlay": "rust-overlay"
       }
     },

@@ -45,6 +45,14 @@ echo $out
 EOF
 chmod +x $out/bin/exo-dev
 
+# The build inputs are also linked directly.  This allows
+# e.g. ~/.emacs.d/rust-toolchain to refer to
+# ~/exo/exo-dev/result/rust-toolchain.
+(cd $out
+ln -s ${rustToolchain} rust-toolchain
+ln -s ${cToolchain} c-toolchain
+)
+
 ls -l $out
 cat $out/env
 
