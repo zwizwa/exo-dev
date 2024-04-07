@@ -56,6 +56,11 @@
           extensions = [ "rust-src" "rust-analyzer" ];
           inherit targets;
         };
+        haskell = pkgs.haskellPackages.ghcWithPackages (pkgs: with pkgs; [
+          cabal-install
+          ghcid
+        ]);
+
         buildInputs = (with pkgs_old; [
           # FIXME: Is this still needed?
           python
@@ -67,7 +72,7 @@
           # debugging
           openocd
           # C
-          gcc clang
+          gcc clang pkg-config
           # usb
           libusb libusb-compat-0_1
           # audio
@@ -78,6 +83,13 @@
           yosys nextpnr
           # zig
           zig
+          # haskell
+          haskell
+          # racket
+          racket
+          # accounting
+          hledger hledger-ui
+     
         ]);
     in
   {
