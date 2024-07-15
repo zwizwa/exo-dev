@@ -25,6 +25,10 @@
     # dependencies change.
     libopencm3.url = github:zwizwa/libopencm3-flake;
 
+    # See https://wiki.nixos.org/wiki/ESP-IDF
+    # I'm using the "manual install" procedure below.
+    # esp32-idf.url = github:mirrexagon/nixpkgs-esp-dev; #esp32-idf;
+
     # Wrapper for binary distribution implemented as a nixpkgs overlay.
     # https://github.com/oxalica/rust-overlay/blob/master/docs/reference.md
     # https://github.com/oxalica/rust-overlay/blob/master/README.md
@@ -61,18 +65,63 @@
           ghcid
         ]);
 
+        pythonWithPackages = pkgs.python3.withPackages (ps: with ps; [
+          # esphome
+        ]);
+
+        fhsEnv = pkgs.buildFHSUserEnv {
+          name = "esp32-toolchain-env";
+          targetPkgs = pkgs: with pkgs; [ zlib ];
+          runScript = "";
+        };
+
+        esp32 = pkgs.stdenv.mkDerivation rec {
+          pname = "esp32-toolchain";
+          version = "2021r2-patch3";
+
+          src = pkgs.fetchurl {
+            #    url = "https://github.com/espressif/crosstool-NG/releases/download/esp-${version}/riscv32-esp-elf-gcc8_4_0-esp-${version}-linux-amd64.tar.gz";
+            #    hash = "sha256-F5y61Xl5CtNeD0FKGNkAF8DxWMOXAiQRqOmGfbIXTxU=";
+            url = "https://github.com/espressif/crosstool-NG/releases/download/esp-${version}/xtensa-esp32-elf-gcc8_4_0-esp-${version}-linux-amd64.tar.gz";
+            hash = "sha256-nt0ed2J2iPQ1Vhki0UKZ9qACG6H2/2fkcuEQhpWmnlM=";
+          };
+
+          buildInputs = [ pkgs.makeWrapper ];
+
+          phases = [ "unpackPhase" "installPhase" ];
+
+          installPhase = ''
+            cp -r . $out
+            for FILE in $(ls $out/bin); do
+              FILE_PATH="$out/bin/$FILE"
+              if [[ -x $FILE_PATH ]]; then
+                mv $FILE_PATH $FILE_PATH-unwrapped
+                makeWrapper ${fhsEnv}/bin/esp32-toolchain-env $FILE_PATH --add-flags "$FILE_PATH-unwrapped"
+              fi
+            done      
+          '';
+
+          meta = with pkgs.lib; {
+            description = "ESP32 toolchain";
+            homepage = https://docs.espressif.com/projects/esp-idf/en/stable/get-started/linux-setup.html;
+            license = licenses.gpl3;
+          };
+        };
+
         buildInputs = (with pkgs_old; [
-          # FIXME: Is this still needed?
-          python
+          # Pyton
+          pythonWithPackages
           # C
           gcc-arm-embedded
+          # ESP
+          esp32
         ]) ++ (with pkgs; [
           # base deps
           which bash hexdump git socat readline sqlite boehmgc
           # debugging
           openocd
           # C
-          gcc clang pkg-config
+          gcc clang pkg-config clang-tools
           # usb
           libusb libusb-compat-0_1
           # audio
@@ -101,6 +150,10 @@
         LIBOPENCM3 = libopencm3.packages.${system}.default;
         inherit buildInputs rustToolchain;
         cToolchain = pkgs.gcc;
+        racket = pkgs.racket;
+        # FIXME: Create a bin directory with all pacakges and link it.
+        # This makes it easier to link everything into ~/.emacs.d/bin
+        # as well.
         builder = ./builder.sh;
       };
 

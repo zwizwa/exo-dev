@@ -51,6 +51,7 @@ chmod +x $out/bin/exo-dev
 (cd $out
 ln -s ${rustToolchain} rust-toolchain
 ln -s ${cToolchain} c-toolchain
+ln -s ${racket} racket
 )
 
 ls -l $out
